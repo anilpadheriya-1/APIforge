@@ -8,8 +8,8 @@ create table profiles (
 -- Set up Row Level Security (RLS)
 alter table profiles enable row level security;
 
-create policy "Public profiles are viewable by everyone." on profiles
-  for select using (true);
+create policy "Users can view own profile." on profiles
+  for select using (auth.uid() = id);
 
 create policy "Users can insert their own profile." on profiles
   for insert with check (auth.uid() = id);

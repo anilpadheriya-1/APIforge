@@ -3,12 +3,21 @@
 import { createClient } from '@/utils/supabase/server'
 import crypto from 'crypto'
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default_secret_key_needs_to_be_32_bytes!' // 32 bytes
 const IV_LENGTH = 16
+
+function getEncryptionKey() {
+  const key = process.env.ENCRYPTION_KEY
+  if (!key) {
+    throw new Error('ENCRYPTION_KEY is not set in environment variables.')
+  }
+  // Cryptographically hash the key to ensure it's exactly 32 bytes
+  return crypto.createHash('sha256').update(key).digest()
+}
 
 function encrypt(text: string) {
   const iv = crypto.randomBytes(IV_LENGTH)
-  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)), iv)
+  const key = getEncryptionKey()
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
   let encrypted = cipher.update(text)
   encrypted = Buffer.concat([encrypted, cipher.final()])
   return iv.toString('hex') + ':' + encrypted.toString('hex')
@@ -18,7 +27,8 @@ function decrypt(text: string) {
   const textParts = text.split(':')
   const iv = Buffer.from(textParts.shift()!, 'hex')
   const encryptedText = Buffer.from(textParts.join(':'), 'hex')
-  const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)), iv)
+  const key = getEncryptionKey()
+  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
   let decrypted = decipher.update(encryptedText)
   decrypted = Buffer.concat([decrypted, decipher.final()])
   return decrypted.toString()
