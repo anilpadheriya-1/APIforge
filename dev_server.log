@@ -9,3 +9,4 @@
 ✓ Ready in 735ms
 
  GET /login 200 in 1364ms (next.js: 405ms, proxy.ts: 514ms, application-code: 444ms)
+ GET /login 200 in 881ms (next.js: 134ms, proxy.ts: 178ms, application-code: 568ms)
