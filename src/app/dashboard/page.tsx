@@ -18,22 +18,19 @@ export default async function DashboardPage() {
 
   let usageData = null
   let totalSpend = 0
-  let tokenCount = 0
-  let requestCount = 0
+  let apiError = null
 
   try {
     usageData = await getOpenAIUsage()
-    if (usageData) {
+    if (usageData && usageData.error) {
+      apiError = usageData.error
+      usageData = null
+    } else if (usageData) {
       totalSpend = usageData.total_usage ? usageData.total_usage / 100 : 0
-
-      // OpenAI usage API doesn't always return token/request count directly in this endpoint
-      // We will estimate or extract if available, otherwise just use mock values for demonstration
-      // since the specific requirement asks for them but the API might not provide them directly in this endpoint
-      tokenCount = usageData.total_usage ? usageData.total_usage * 100 : 0 // Rough mock estimate based on cost
-      requestCount = usageData.daily_costs ? usageData.daily_costs.length * 10 : 0 // Rough mock estimate
     }
   } catch (error) {
     console.error("Failed to load usage data")
+    apiError = "An unexpected error occurred while loading usage data."
   }
 
   return (
@@ -43,11 +40,15 @@ export default async function DashboardPage() {
         <div className="text-sm text-muted-foreground">{user.email}</div>
       </header>
 
+      {apiError && (
+        <div className="bg-destructive/15 text-destructive p-4 rounded-md text-sm font-medium">
+          {apiError}
+        </div>
+      )}
+
       <div className="grid gap-8">
         <StatsCards
           totalSpend={totalSpend}
-          tokenCount={tokenCount}
-          requestCount={requestCount}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

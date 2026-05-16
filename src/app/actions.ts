@@ -93,14 +93,15 @@ export async function getOpenAIUsage() {
     })
 
     if (!response.ok) {
-      console.error('OpenAI API Error:', await response.text())
-      throw new Error('Failed to fetch from OpenAI')
+      const errorText = await response.text()
+      console.error('OpenAI API Error:', errorText)
+      return { error: 'Failed to fetch usage from OpenAI. Please verify your API key.' }
     }
 
     const data = await response.json()
     return data
   } catch (error) {
     console.error('Error fetching usage:', error)
-    throw new Error('Failed to process usage data')
+    return { error: 'An unexpected error occurred while processing usage data.' }
   }
 }
