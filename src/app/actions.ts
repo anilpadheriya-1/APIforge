@@ -89,7 +89,7 @@ export async function getOpenAIUsage() {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
       },
-      next: { revalidate: 3600 } // Cache for 1 hour
+      cache: 'no-store'
     })
 
     if (!response.ok) {
