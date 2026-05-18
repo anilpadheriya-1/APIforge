@@ -16,15 +16,22 @@ export default async function DashboardPage() {
     return redirect('/login')
   }
 
+  // Conflict resolved: Both variables are now correctly initialized
   let usageData = null
   let totalSpend = 0
+  let apiError = null
+
   try {
     usageData = await getOpenAIUsage()
-    if (usageData) {
+    if (usageData && usageData.error) {
+      apiError = usageData.error
+      usageData = null
+    } else if (usageData) {
       totalSpend = usageData.total_usage ? usageData.total_usage / 100 : 0
     }
   } catch (error) {
     console.error("Failed to load usage data")
+    apiError = "An unexpected error occurred while loading usage data."
   }
 
   return (
@@ -33,6 +40,12 @@ export default async function DashboardPage() {
         <h1 className="text-3xl font-bold">APIForge Dashboard</h1>
         <div className="text-sm text-muted-foreground">{user.email}</div>
       </header>
+
+      {apiError && (
+        <div className="bg-destructive/15 text-destructive p-4 rounded-md text-sm font-medium">
+          {apiError}
+        </div>
+      )}
 
       <div className="grid gap-8">
         <StatsCards
