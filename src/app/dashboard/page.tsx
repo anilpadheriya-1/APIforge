@@ -16,6 +16,7 @@ export default async function DashboardPage() {
     return redirect('/login')
   }
 
+  // Conflict resolved: Both variables are now correctly initialized
   let usageData = null
   let totalSpend = 0
   let apiError = null

@@ -17,21 +17,36 @@ function getEncryptionKey() {
 function encrypt(text: string) {
   const iv = crypto.randomBytes(IV_LENGTH)
   const key = getEncryptionKey()
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
   let encrypted = cipher.update(text)
   encrypted = Buffer.concat([encrypted, cipher.final()])
-  return iv.toString('hex') + ':' + encrypted.toString('hex')
+  const authTag = cipher.getAuthTag()
+  // Format: iv:encryptedData:authTag
+  return iv.toString('hex') + ':' + encrypted.toString('hex') + ':' + authTag.toString('hex')
 }
 
 function decrypt(text: string) {
   const textParts = text.split(':')
   const iv = Buffer.from(textParts.shift()!, 'hex')
-  const encryptedText = Buffer.from(textParts.join(':'), 'hex')
   const key = getEncryptionKey()
-  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
-  let decrypted = decipher.update(encryptedText)
-  decrypted = Buffer.concat([decrypted, decipher.final()])
-  return decrypted.toString()
+
+  if (textParts.length === 2) {
+    // New format (GCM): encryptedData:authTag
+    const encryptedText = Buffer.from(textParts[0], 'hex')
+    const authTag = Buffer.from(textParts[1], 'hex')
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv)
+    decipher.setAuthTag(authTag)
+    let decrypted = decipher.update(encryptedText)
+    decrypted = Buffer.concat([decrypted, decipher.final()])
+    return decrypted.toString()
+  } else {
+    // Legacy format (CBC): encryptedData
+    const encryptedText = Buffer.from(textParts[0], 'hex')
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+    let decrypted = decipher.update(encryptedText)
+    decrypted = Buffer.concat([decrypted, decipher.final()])
+    return decrypted.toString()
+  }
 }
 
 export async function saveApiKey(apiKey: string) {
