@@ -1,0 +1,3 @@
+## 2024-05-16 - Daily Usage Table Empty State
+**Learning:** Replaced a plain "No usage data available." text string with a richer empty state for the daily usage table. The new empty state uses an icon (`LineChart` from `lucide-react`) centered in a muted circle, clear title text, and a helpful call-to-action message explaining *why* there's no data and *how* to fix it (adding an OpenAI API key in settings). This makes the dashboard feel much more complete and user-friendly for new accounts.
+**Action:** Always consider replacing plain text empty states with richer, actionable empty states that include icons, clear headings, and helpful guidance text, especially for primary data views like dashboard tables.

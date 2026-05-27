@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { format } from 'date-fns'
+import { LineChart } from 'lucide-react'
 
 type DailyUsageProps = {
   dailyCosts: { timestamp: number; line_items: { cost: number }[] }[]
@@ -20,8 +21,14 @@ export function DailyUsageTable({ dailyCosts }: DailyUsageProps) {
         <CardHeader>
           <CardTitle>Daily Usage Breakdown</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm">No usage data available.</p>
+        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="rounded-full bg-muted p-3 mb-4">
+            <LineChart className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+          </div>
+          <p className="text-lg font-medium">No usage data</p>
+          <p className="text-muted-foreground text-sm max-w-sm mt-1">
+            Add your OpenAI API key in the settings to start tracking your daily costs and usage.
+          </p>
         </CardContent>
       </Card>
     )
